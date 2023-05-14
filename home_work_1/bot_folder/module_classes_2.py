@@ -87,9 +87,7 @@ class Fields:
 
 
 class Name(Fields):
-
-    def __init__(self):
-        self.__name = ''
+    
 
     UKR_LETTERS = 'йцукенгшщзхїфівапролджєячсмитьбю.-_ '
     UKR_LETTERS_UP = UKR_LETTERS.upper()
