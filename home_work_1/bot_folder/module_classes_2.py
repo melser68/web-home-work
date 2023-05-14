@@ -3,9 +3,81 @@ from string import ascii_letters
 from datetime import datetime, timedelta
 import os
 import locale
+from abc import ABC, abstractmethod
 locale.setlocale(locale.LC_ALL, "")
 
+#==========================================================================
+#Реалізація абстракції при заповнюванні книги кнтактів виклик = строка 240
+#Абстракція
+class AbstractGetInfo(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+        self.data = None
 
+    @abstractmethod    
+    def get_info(self):
+        pass
+
+#Заповнення з текстовго файлу
+class GetTXTInfo(AbstractGetInfo):
+    def __init__(self, output = {}) -> None:
+        super().__init__()
+        self.data = 'phonebook.msf'
+        self.output = output
+
+    def get_info(self):
+        try:
+            with open(self.data) as file_book:
+                line_count = sum(1 for line in open('phonebook.msf'))
+
+                if line_count > 0:
+                    for i in file_book:
+                        res = i.replace('\n', '').replace(':', ';').split(';')
+                        self.name = Name()
+                        self.name.name = res[0]
+                        self.phone = Phone()
+                        self.email = Email()
+                        self.date_birth = DateBirth()
+
+                        for y in res[1].split(','):
+                            self.phone.phone = y
+                        for u in res[2].split(','):
+                            self.email.email = u
+                        self.date_birth.date_birth = res[3]
+                        self.output.update({self.name.name: [{'phone': self.phone.phone},
+                                                                {'email': self.email.email}, {'date_birth': self.date_birth.date_birth}]})
+            return self.output
+        except FileNotFoundError:
+            file_book = open('phonebook.msf', 'w')
+            file_book.close()
+            self.fill_book()
+
+
+# Заповнення з json файлу
+class GetJSONInfo(AbstractGetInfo):
+    def __init__(self, output = {}) -> None:
+        super().__init__()
+        self.data = 'phonebook.json'
+        self.output = output
+
+    #При необхідності можна реалізувати
+    def get_info(self):
+        return self.output
+
+
+#Виконання заповнення книги контактів
+class GetInfo:
+    def __init__(self) -> None:
+        self.listing = [GetTXTInfo, GetJSONInfo]
+
+    def get_info(self):
+        result = {}
+        for i in self.listing:
+            step = i()
+            result.update(step.get_info())
+        return result
+#End
+#======================================================================================
 
 class Fields:
     __name = None
@@ -166,32 +238,9 @@ class Record:
 
     # Заповнюємо словник існуючими контактами при запуску програми
     def fill_book(self):
-        try:
-            file_book = open('phonebook.msf')
-            line_count = sum(1 for line in open('phonebook.msf'))
+        node = GetInfo()
+        self.book.update(node.get_info())
 
-            if line_count > 0:
-                for i in file_book:
-                    res = i.replace('\n', '').replace(':', ';').split(';')
-                    self.name = Name()
-                    self.name.name = res[0]
-                    self.phone = Phone()
-                    self.email = Email()
-                    self.date_birth = DateBirth()
-
-                    for y in res[1].split(','):
-                        self.phone.phone = y
-                    for u in res[2].split(','):
-                        self.email.email = u
-                    self.date_birth.date_birth = res[3]
-                    self.book.data.update({self.name.name: [{'phone': self.phone.phone},
-                                                            {'email': self.email.email}, {'date_birth': self.date_birth.date_birth}]})
-
-            file_book.close()
-        except FileNotFoundError:
-            file_book = open('phonebook.msf', 'w')
-            file_book.close()
-            self.fill_book()
 
     # Додавання запису у книгу
     def add_record(self, name, phone=[], email=[], date_birth=''):
