@@ -3,9 +3,11 @@ from string import ascii_letters
 from datetime import datetime, timedelta
 import os
 import locale
+
 locale.setlocale(locale.LC_ALL, "")
 import json
 import time
+
 
 class Record:
     def __init__(self):
@@ -62,16 +64,22 @@ class Record:
         print("| {:^20s} | {:^20s} | {:^20s} |".format("Title", "Text", "Tags"))
         print("-" * 66)
         for note in notes:
-            print("| {:20s} | {:20s} | {:20s} |".format(note["title"], note["text"], ", ".join(note["tags"])))
+            print(
+                "| {:20s} | {:20s} | {:20s} |".format(
+                    note["title"], note["text"], ", ".join(note["tags"])
+                )
+            )
             print("-" * 66)
-        
+
     def edit_note(self, title):
         for note in self.notes:
             if note["title"] == title:
                 new_title = input("Enter a new title: ")
                 new_text = input("Enter new text: ")
                 new_tags = input("Enter tags (comma-separated): ")
-                while not new_tags or all(not tag.strip() for tag in new_tags.split(",")):
+                while not new_tags or all(
+                    not tag.strip() for tag in new_tags.split(",")
+                ):
                     print("Error: At least one tag must be provided.")
                     new_tags = input("Enter tags (comma-separated): ")
                 new_tags = [tag.strip() for tag in new_tags.split(",")]
